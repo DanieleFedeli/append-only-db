@@ -1,12 +1,30 @@
 import fs from 'node:fs'
+import type { KeyvStoreAdapter, } from 'keyv'
+import { EventEmitter } from 'node:events'
 
-export class AppendOnlyClient {
+export interface AppendOnlyKeyvOpts {
+  namespace?: string
+}
+export class AppendOnlyKeyv extends EventEmitter implements KeyvStoreAdapter {
   private fd: number
   private offset = 0
   private index: Record<string, { offset: number, length: number } | undefined> = {}
+  private filePath: string
+  namespace?: string | undefined
 
-  constructor(filePath: string) {
+  constructor(filePath: string, opts: AppendOnlyKeyvOpts = {}) {
+    super()
+    this.filePath = filePath
     this.fd = fs.openSync(filePath, "a+")
+    this.namespace = opts.namespace
+  }
+
+  get opts() {
+    return {
+      filePath: this.filePath,
+      fd: this.fd,
+      currentOffset: this.offset,
+    }
   }
 
   get(key: string) {
@@ -28,10 +46,36 @@ export class AppendOnlyClient {
     return 'OK' as const
   }
 
-  delete(key: string) {
+  async delete(key: string) {
     const message = this.buildMessage(key, null, { deleted: true })
     this.index[key] = undefined
-    fs.writevSync(this.fd, [Buffer.from(message)]);
+    return new Promise<boolean>((resolve,) => {
+      fs.writev(this.fd, [Buffer.from(message)], () => {
+        resolve(true)
+      });
+
+    })
+  }
+
+  clear(): Promise<void> {
+    this.index = {}
+    return Promise.resolve()
+  }
+
+  has?(key: string): Promise<boolean> {
+    const record = this.index[key];
+    return Promise.resolve(Boolean(record))
+  }
+
+  disconnect?(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      fs.close(this.fd, (err) => {
+        if (err) {
+          return reject(err)
+        }
+        resolve()
+      })
+    })
   }
 
   private buildMessage(key: string, value: string | null, { deleted }: { deleted?: boolean } = {}) {
@@ -40,6 +84,7 @@ export class AppendOnlyClient {
   }
 
   private messagePrefix(key: string) {
+    if (this.namespace) return `${this.namespace}:${key}: `
     return key + ": "
   }
 }
