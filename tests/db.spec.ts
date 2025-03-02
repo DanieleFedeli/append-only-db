@@ -26,4 +26,14 @@ describe("AppendOnlyClient", () => {
       expect(content).toBe("key: value")
     })
   })
+
+  describe("get method", () => {
+    it("returns the value for the given key", () => {
+      const client = new AppendOnlyClient(filename)
+
+      client.set("key", "value - 1")
+
+      expect(client.get("key")).toBe("value - 1")
+    })
+  })
 })
