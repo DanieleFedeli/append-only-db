@@ -11,16 +11,17 @@ describe("AppendOnlyClient", () => {
   })
 
   describe("set method", () => {
-    it("returns 'OK' upon a successful set", () => {
+    it("returns 'OK' upon a successful set", async () => {
       const client = new AppendOnlyKeyv(filename)
 
-      expect(client.set("key", "value")).toBe("OK")
+      const res = await client.set("key", "value")
+      expect(res).toBe("OK")
     })
 
-    it("writes the key-value pair to the file", () => {
+    it("writes the key-value pair to the file", async () => {
       const client = new AppendOnlyKeyv(filename)
 
-      client.set("key", "value")
+      await client.set("key", "value")
 
       const content = fs.readFileSync(path.join(filename), "utf8").split('\n').filter(Boolean).pop()
       expect(content).contain("value")
@@ -30,29 +31,29 @@ describe("AppendOnlyClient", () => {
   })
 
   describe("get method", () => {
-    it("returns undefined if the key doesn't exist", () => {
+    it("returns undefined if the key doesn't exist", async () => {
       const client = new AppendOnlyKeyv(filename)
 
-      expect(client.get("key")).toBeUndefined()
+      expect(await client.get("key")).toBeUndefined()
     })
 
-    it("works with namespaced keys", () => {
+    it("works with namespaced keys", async () => {
       const client = new AppendOnlyKeyv(filename, { namespace: "ns" })
 
       client.set("key", "value")
 
-      expect(client.get("key")).toBe("value")
+      expect(await client.get("key")).toBe("value")
     })
 
-    it("returns the value for the given key", () => {
+    it("returns the value for the given key", async () => {
       const client = new AppendOnlyKeyv(filename)
 
-      client.set("key", "value - 1")
+      await client.set("key", "value - 1")
 
-      expect(client.get("key")).toBe("value - 1")
+      expect(await client.get("key")).toBe("value - 1")
     })
 
-    it("returns the right key even after multiple different sets", () => {
+    it("returns the right key even after multiple different sets", async () => {
       const client = new AppendOnlyKeyv(filename)
 
       client.set("key", "value")
@@ -60,8 +61,8 @@ describe("AppendOnlyClient", () => {
       client.set("key 2", "value - 2")
       client.set("key 3", "value - 3")
 
-      expect(client.get("key 2")).toBe("value - 2")
-      expect(client.get("key")).toBe("value")
+      expect(await client.get("key 2")).toBe("value - 2")
+      expect(await client.get("key")).toBe("value")
     })
   })
 })
