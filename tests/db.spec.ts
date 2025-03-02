@@ -1,4 +1,4 @@
-import { afterAll, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
 import fs from 'node:fs'
 import path from 'node:path'
 import { AppendOnlyClient } from '../src/db/client'
@@ -6,7 +6,7 @@ import { AppendOnlyClient } from '../src/db/client'
 describe("AppendOnlyClient", () => {
   const filename = Math.random().toString(36).substring(7) + ".txt"
 
-  afterAll(() => {
+  afterEach(() => {
     fs.unlinkSync(filename)
   })
 
@@ -22,7 +22,7 @@ describe("AppendOnlyClient", () => {
 
       client.set("key", "value")
 
-      const content = fs.readFileSync(path.join(filename), "utf8").split('\n').pop()
+      const content = fs.readFileSync(path.join(filename), "utf8").split('\n').filter(Boolean).pop()
       expect(content).toBe("key: value")
     })
   })
