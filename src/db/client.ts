@@ -3,8 +3,7 @@ import fs from 'node:fs'
 export class AppendOnlyClient {
   private fd: number
   private offset = 0
-  // Store the byte where the key is written in the file
-  private index: Record<string, { offset: number, length: number }> = {}
+  private index: Record<string, { offset: number, length: number } | undefined> = {}
 
   constructor(filePath: string) {
     this.fd = fs.openSync(filePath, "a+")
@@ -18,7 +17,7 @@ export class AppendOnlyClient {
     const buffer = Buffer.alloc(bytesRead)
     fs.readSync(this.fd, buffer, 0, bytesRead, record.offset + kl);
 
-    return buffer.toString().trim()
+    return JSON.parse(buffer.toString().trim()).value
   }
 
   set(key: string, value: string) {
@@ -29,8 +28,15 @@ export class AppendOnlyClient {
     return 'OK' as const
   }
 
-  private buildMessage(key: string, value: string) {
-    return `${this.messagePrefix(key)}${value}\n`
+  delete(key: string) {
+    const message = this.buildMessage(key, null, { deleted: true })
+    this.index[key] = undefined
+    fs.writevSync(this.fd, [Buffer.from(message)]);
+  }
+
+  private buildMessage(key: string, value: string | null, { deleted }: { deleted?: boolean } = {}) {
+    const formattedValue = JSON.stringify({ value, timestamp: Date.now(), deleted })
+    return `${this.messagePrefix(key)}${formattedValue}\n`
   }
 
   private messagePrefix(key: string) {
