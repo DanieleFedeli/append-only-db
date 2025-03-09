@@ -65,4 +65,66 @@ describe("AppendOnlyClient", () => {
       expect(await client.get("key")).toBe("value")
     })
   })
+
+  describe("delete method", () => {
+    it("returns true", async () => {
+      const client = new AppendOnlyKeyv(filename)
+
+      await client.set("a", "b")
+      const res = await client.delete("a")
+      expect(res).toBe(true)
+    })
+
+    it("adds a tombstone to the file", async () => {
+      const client = new AppendOnlyKeyv(filename)
+
+      await client.set("a", "b")
+      await client.delete("a")
+
+      const content = fs.readFileSync(filename)
+      expect(content.toString()).toContain("deleted\":true")
+    })
+
+    it("removes the key from the index", async () => {
+      const client = new AppendOnlyKeyv(filename)
+
+      await client.set("a", "b")
+      await client.delete("a")
+
+      expect(await client.get("a")).toBeUndefined()
+    })
+  })
+
+  describe("opts getter", () => {
+    it("returns an object", () => {
+      const client = new AppendOnlyKeyv(filename)
+
+      expect(client.opts.filePath).toBe(filename)
+      expect(client.opts).toEqual(expect.objectContaining({
+        currentOffset: expect.any(Number),
+        fd: expect.any(Number)
+      }))
+    })
+  })
+
+  describe("clear method", () => {
+    it("clears the index", async () => {
+      const client = new AppendOnlyKeyv(filename)
+
+      await client.set("a", "b")
+      await client.clear()
+
+      expect(await client.get("a")).toBeUndefined()
+    })
+  })
+
+  describe("has method", () => {
+    it("returns true if the key exists", async () => {
+      const client = new AppendOnlyKeyv(filename)
+
+      await client.set("a", "b")
+
+      expect(await client.has("a")).toBe(true)
+    })
+  })
 })

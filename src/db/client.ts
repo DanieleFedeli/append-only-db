@@ -77,12 +77,12 @@ export class AppendOnlyKeyv extends EventEmitter implements KeyvStoreAdapter {
     return Promise.resolve()
   }
 
-  has?(key: string): Promise<boolean> {
+  has(key: string): Promise<boolean> {
     const record = this.index[key];
     return Promise.resolve(Boolean(record))
   }
 
-  disconnect?(): Promise<void> {
+  disconnect(): Promise<void> {
     return new Promise((resolve, reject) => {
       fs.close(this.fd, (err) => {
         if (err) {
