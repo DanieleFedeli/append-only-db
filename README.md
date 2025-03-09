@@ -1,4 +1,5 @@
 # Append-Only Storage
+[![Checked with Biome](https://img.shields.io/badge/Checked_with-Biome-60a5fa?style=flat&logo=biome)](https://biomejs.dev)
 
 A simple, append-only storage adapter for [Keyv](https://github.com/jaredwray/keyv), providing persistent key-value storage with an append-only log file structure.
 
