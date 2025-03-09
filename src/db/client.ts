@@ -88,7 +88,7 @@ export class AppendOnlyKeyv extends EventEmitter implements KeyvStoreAdapter {
         if (err) {
           return reject(err)
         }
-        resolve()
+        return resolve()
       })
     })
   }
