@@ -1,5 +1,5 @@
 # Append-Only Storage
-[![Checked with Biome](https://img.shields.io/badge/Checked_with-Biome-60a5fa?style=flat&logo=biome)](https://biomejs.dev)
+[![Checked with Biome](https://img.shields.io/badge/Checked_with-Biome-60a5fa?style=flat&logo=biome)](https://biomejs.dev) [![codecov](https://codecov.io/github/DanieleFedeli/append-only-db/branch/main/graph/badge.svg?token=dz2usCjEIy)](https://codecov.io/github/DanieleFedeli/append-only-db)
 
 A simple, append-only storage adapter for [Keyv](https://github.com/jaredwray/keyv), providing persistent key-value storage with an append-only log file structure.
 
