@@ -5,7 +5,7 @@
 	"main": "index.js",
 	"scripts": {
 		"test": "vitest",
-		"test:coverage": "c8 vitest",
+		"test:coverage": "vitest --reporter=junit --outputFile=test-report.junit.xml",
 		"typecheck": "tsc --noEmit",
 		"check": "biome check --write"
 	},

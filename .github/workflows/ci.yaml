@@ -53,11 +53,8 @@ jobs:
       - name: Test with coverage
         run: pnpm test:coverage 
         
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@v1
         with:
-          directory: ./coverage
-          fail_ci_if_error: false
-          verbose: true
           token: ${{ secrets.CODECOV_TOKEN }}
-          
